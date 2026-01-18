@@ -1,0 +1,59 @@
+# GitHub Actions Workflow for deploying AI Nexus to GitHub Pages
+# This file should be placed in: .github/workflows/deploy.yml
+
+name: Deploy to GitHub Pages
+
+# Controls when the workflow will run
+on:
+  # Triggers the workflow on push events but only for the main branch
+  push:
+    branches: [ main ]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a single job called "deploy"
+  deploy:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Sets up Node.js environment
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      # Installs dependencies
+      - name: Install dependencies
+        run: npm install
+
+      # Builds the project
+      - name: Build project
+        run: npm run build
+
+      # Deploys to GitHub Pages
+      - name: Deploy to GitHub Pages
+        run: npm run deploy
+        env:
+          # This token is automatically provided by GitHub Actions
+          # It has the permissions needed to push to the gh-pages branch
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # Optional: Notify on success
+      - name: Deployment success
+        if: success()
+        run: echo "🎉 Deployment to GitHub Pages completed successfully!"
+
+      # Optional: Notify on failure
+      - name: Deployment failure
+        if: failure()
+        run: echo "❌ Deployment failed. Check the logs above for errors."
