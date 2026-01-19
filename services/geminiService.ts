@@ -8,14 +8,26 @@ import { logger } from "./loggingService.ts";
 const lastRequestTimestamps = new Map<string, number>();
 
 // --- Gemini Client Setup ---
-const API_KEY = typeof process !== 'undefined' ? process.env.API_KEY : undefined;
+// For GitHub Pages deployment, we need to handle API keys differently
+const getDefaultApiKey = (): string | undefined => {
+  if (typeof process !== 'undefined' && process.env.API_KEY) {
+    return process.env.API_KEY;
+  }
+  // GitHub Pages: Check if user provided key via window object
+  if (typeof window !== 'undefined' && window.AI_NEXUS_CONFIG?.userApiKey) {
+    return window.AI_NEXUS_CONFIG.userApiKey;
+  }
+  return undefined;
+};
+
+const API_KEY = getDefaultApiKey();
 let defaultAi: GoogleGenAI | null = null;
 
 if (API_KEY) {
   defaultAi = new GoogleGenAI({ apiKey: API_KEY });
 } else {
-  const errorMsg = "API_KEY environment variable not set. The application will not be able to connect to the Gemini API by default.";
-  logger.warn(errorMsg);
+  const errorMsg = "API_KEY not configured. Users will need to provide their own Gemini API key.";
+  logger.info(errorMsg);
 }
 
 const getAiClient = (apiKey?: string): GoogleGenAI => {
