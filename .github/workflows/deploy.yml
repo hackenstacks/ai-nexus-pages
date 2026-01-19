@@ -41,17 +41,18 @@ jobs:
         run: npm run build
 
       # Deploys to GitHub Pages
-      - name: Configure Git
-        run: |
-          git config --global user.name "GitHub Actions"
-          git config --global user.email "actions@github.com"
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+      
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          # Upload entire dist folder
+          path: './dist'
       
       - name: Deploy to GitHub Pages
-        run: npm run deploy
-        env:
-          # This token is automatically provided by GitHub Actions
-          # It has the permissions needed to push to the gh-pages branch
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        id: deployment
+        uses: actions/deploy-pages@v4
 
       # Optional: Notify on success
       - name: Deployment success
